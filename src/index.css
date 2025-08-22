@@ -1,10 +1,11 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* House of Beauty Design System */
 
 @layer base {
   :root {
@@ -36,23 +37,26 @@ All colors MUST be HSL.
     --input: 214.3 31.8% 91.4%;
     --ring: 222.2 84% 4.9%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
 
-    --sidebar-background: 0 0% 98%;
+    /* House of Beauty Palette */
+    --cream-50: 60 9% 98%;
+    --cream-100: 60 9% 96%;
+    --cream-200: 60 9% 92%;
+    --cream-500: 60 9% 85%;
+    --cream-900: 60 9% 20%;
 
-    --sidebar-foreground: 240 5.3% 26.1%;
+    --luxury-gold: 45 100% 70%;
+    --luxury-gold-light: 45 100% 85%;
+    --luxury-gold-dark: 45 100% 55%;
 
-    --sidebar-primary: 240 5.9% 10%;
+    --natural-green: 142 76% 36%;
+    --natural-green-light: 142 76% 45%;
+    --natural-green-dark: 142 76% 28%;
 
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --beige-light: 40 20% 90%;
+    --beige: 40 20% 80%;
+    --beige-dark: 40 20% 70%;
   }
 
   .dark {
@@ -83,14 +87,17 @@ All colors MUST be HSL.
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* Dark mode adjustments */
+    --cream-50: 60 9% 8%;
+    --cream-100: 60 9% 12%;
+    --cream-200: 60 9% 16%;
+    --cream-500: 60 9% 25%;
+    --cream-900: 60 9% 85%;
+
+    --beige-light: 40 20% 15%;
+    --beige: 40 20% 20%;
+    --beige-dark: 40 20% 25%;
   }
 }
 
@@ -98,8 +105,131 @@ All colors MUST be HSL.
   * {
     @apply border-border;
   }
-
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-modern;
+  }
+}
+
+@layer components {
+  /* Button Variants */
+  .btn-luxury {
+    @apply bg-luxury-gradient text-white font-medium px-8 py-3 rounded-lg 
+           hover:shadow-lg hover:scale-105 transition-all duration-300
+           border border-luxury-gold/20;
+  }
+
+  .btn-natural {
+    @apply bg-natural-gradient text-white font-medium px-8 py-3 rounded-lg 
+           hover:shadow-lg hover:scale-105 transition-all duration-300;
+  }
+
+  .btn-outline-luxury {
+    @apply border-2 border-luxury-gold text-luxury-gold bg-transparent 
+           hover:bg-luxury-gold hover:text-white font-medium px-8 py-3 rounded-lg 
+           transition-all duration-300;
+  }
+
+  .btn-ghost {
+    @apply text-foreground hover:bg-cream-100 font-medium px-6 py-2 rounded-lg 
+           transition-all duration-300;
+  }
+
+  /* Card Variants */
+  .card-luxury {
+    @apply bg-card border border-luxury-gold/20 rounded-xl shadow-lg 
+           hover:shadow-xl hover:border-luxury-gold/40 transition-all duration-300;
+  }
+
+  .card-product {
+    @apply bg-card rounded-xl shadow-md hover:shadow-xl 
+           hover:scale-105 transition-all duration-300 overflow-hidden;
+  }
+
+  /* Text Variants */
+  .text-luxury-heading {
+    @apply font-luxury text-3xl md:text-4xl lg:text-5xl font-bold 
+           bg-gradient-to-r from-luxury-gold to-luxury-gold-dark 
+           bg-clip-text text-transparent;
+  }
+
+  .text-hero-title {
+    @apply font-luxury text-4xl md:text-6xl lg:text-7xl font-bold 
+           text-foreground leading-tight;
+  }
+
+  .text-section-title {
+    @apply font-luxury text-2xl md:text-3xl font-semibold text-foreground;
+  }
+
+  /* Layout Components */
+  .hero-section {
+    @apply bg-hero-gradient min-h-screen flex items-center justify-center 
+           relative overflow-hidden;
+  }
+
+  .section-padding {
+    @apply py-16 md:py-24 px-4 md:px-8;
+  }
+
+  .container-custom {
+    @apply max-w-7xl mx-auto;
+  }
+
+  /* Product Grid */
+  .products-grid {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 
+           gap-6 md:gap-8;
+  }
+
+  /* Animations */
+  .shimmer-effect {
+    @apply bg-gradient-to-r from-transparent via-white/20 to-transparent 
+           bg-[length:200%_100%] animate-shimmer;
+  }
+
+  /* Navigation */
+  .nav-link {
+    @apply text-foreground hover:text-luxury-gold font-medium 
+           transition-colors duration-300 relative;
+  }
+
+  .nav-link::after {
+    @apply content-[''] absolute bottom-0 left-0 w-0 h-0.5 
+           bg-luxury-gold transition-all duration-300;
+  }
+
+  .nav-link:hover::after {
+    @apply w-full;
+  }
+
+  /* Form Elements */
+  .input-luxury {
+    @apply border border-border rounded-lg px-4 py-3 bg-background 
+           focus:border-luxury-gold focus:ring-2 focus:ring-luxury-gold/20 
+           transition-all duration-300 font-modern;
+  }
+
+  /* Admin Panel */
+  .admin-card {
+    @apply bg-card border border-border rounded-xl shadow-lg p-6;
+  }
+
+  .admin-table {
+    @apply w-full border-collapse bg-card rounded-lg overflow-hidden;
+  }
+
+  .admin-table th {
+    @apply bg-cream-100 dark:bg-cream-200 px-4 py-3 text-left font-semibold 
+           text-foreground border-b border-border;
+  }
+
+  .admin-table td {
+    @apply px-4 py-3 border-b border-border text-foreground;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
   }
 }
