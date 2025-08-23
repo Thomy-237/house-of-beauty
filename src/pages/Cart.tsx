@@ -1,15 +1,18 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Minus, Plus, Trash2, ShoppingBag, ArrowLeft, CreditCard } from 'lucide-react';
+import { Minus, Plus, Trash2, ShoppingBag, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/hooks/useCart';
+import { useCurrency } from '@/contexts/CurrencyContext';
+import CheckoutForm from '@/components/CheckoutForm';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { toast } from 'sonner';
 
 const Cart = () => {
   const { items, updateQuantity, removeItem, getTotalPrice, clearCart } = useCart();
+  const { formatPrice } = useCurrency();
 
   const handleQuantityChange = (productId: string, newQuantity: number) => {
     if (newQuantity < 1) return;
@@ -21,10 +24,6 @@ const Cart = () => {
     toast.success('Produit supprimé', {
       description: `${productName} a été retiré de votre panier.`,
     });
-  };
-
-  const formatPrice = (price: number) => {
-    return `${price.toFixed(2)} €`;
   };
 
   const totalPrice = getTotalPrice();
@@ -225,10 +224,7 @@ const Cart = () => {
                 </div>
 
                 <div className="space-y-3">
-                  <Button className="w-full btn-luxury py-3" size="lg">
-                    <CreditCard className="mr-2 h-5 w-5" />
-                    Procéder au paiement
-                  </Button>
+                  <CheckoutForm />
                   
                   <Link to="/products" className="block">
                     <Button variant="outline" className="w-full btn-outline-luxury">
@@ -240,7 +236,7 @@ const Cart = () => {
                 {/* Payment Methods Preview */}
                 <div className="mt-6 pt-6 border-t border-border">
                   <p className="text-xs text-muted-foreground text-center mb-3">
-                    Moyens de paiement acceptés
+                    Contact : mirakosmetics@gmail.com
                   </p>
                   <div className="flex justify-center space-x-2 opacity-50">
                     <div className="w-8 h-5 bg-gradient-to-r from-blue-600 to-blue-400 rounded text-white text-[8px] flex items-center justify-center font-bold">
@@ -253,9 +249,6 @@ const Cart = () => {
                       MoMo
                     </div>
                   </div>
-                  <p className="text-xs text-muted-foreground text-center mt-2">
-                    (Activation prochaine)
-                  </p>
                 </div>
               </div>
             </div>
