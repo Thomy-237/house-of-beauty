@@ -1,74 +1,7 @@
 
 import { create } from 'zustand';
 import { Product } from './useCart';
-
-// Mock products data - à remplacer par Supabase plus tard
-const mockProducts: Product[] = [
-  {
-    id: '1',
-    name: 'Sérum Vitamine C Bio',
-    price: 45.00,
-    image: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=400&h=400&fit=crop',
-    description: 'Sérum anti-âge enrichi en vitamine C naturelle pour un éclat lumineux.',
-    category: 'soins-visage'
-  },
-  {
-    id: '2',
-    name: 'Crème Hydratante Aloe Vera',
-    price: 32.50,
-    image: 'https://images.unsplash.com/photo-1556228720-195a672e8a03?w=400&h=400&fit=crop',
-    description: 'Crème hydratante quotidienne à base d\'aloe vera bio pour tous types de peau.',
-    category: 'soins-visage'
-  },
-  {
-    id: '3',
-    name: 'Shampooing Naturel Argan',
-    price: 28.00,
-    image: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=400&fit=crop',
-    description: 'Shampooing nourrissant à l\'huile d\'argan pour cheveux secs et abîmés.',
-    category: 'cheveux'
-  },
-  {
-    id: '4',
-    name: 'Rouge à Lèvres Mat Bio',
-    price: 24.90,
-    image: 'https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=400&h=400&fit=crop',
-    description: 'Rouge à lèvres longue tenue aux pigments naturels, fini mat velours.',
-    category: 'maquillage'
-  },
-  {
-    id: '5',
-    name: 'Masque Purifiant Argile Verte',
-    price: 19.90,
-    image: 'https://images.unsplash.com/photo-1612817288484-6f916006741a?w=400&h=400&fit=crop',
-    description: 'Masque purifiant à l\'argile verte pour peaux mixtes à grasses.',
-    category: 'soins-visage'
-  },
-  {
-    id: '6',
-    name: 'Huile Capillaire Coco Bio',
-    price: 22.50,
-    image: 'https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?w=400&h=400&fit=crop',
-    description: 'Huile capillaire nourrissante à l\'huile de coco vierge bio.',
-    category: 'cheveux'
-  },
-  {
-    id: '7',
-    name: 'Fond de Teint Naturel',
-    price: 38.00,
-    image: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=400&h=400&fit=crop',
-    description: 'Fond de teint couvrance modulable aux extraits botaniques.',
-    category: 'maquillage'
-  },
-  {
-    id: '8',
-    name: 'Gommage Corps Sucre Canne',
-    price: 26.90,
-    image: 'https://images.unsplash.com/photo-1615397349754-cfa2066a298e?w=400&h=400&fit=crop',
-    description: 'Gommage exfoliant doux au sucre de canne et huiles essentielles.',
-    category: 'soins-corps'
-  }
-];
+import { getProduits, addProduit, updateProduit, deleteProduit } from '@/services/supabaseService';
 
 interface ProductsStore {
   products: Product[];
@@ -83,16 +16,25 @@ interface ProductsStore {
 }
 
 export const useProducts = create<ProductsStore>((set, get) => ({
-  products: mockProducts,
+  products: [],
   loading: false,
   error: null,
 
   fetchProducts: async () => {
     set({ loading: true, error: null });
     try {
-      // Simuler un délai de chargement
-      await new Promise(resolve => setTimeout(resolve, 500));
-      set({ products: mockProducts, loading: false });
+      const data = await getProduits();
+      const formattedProducts: Product[] = data?.map((product: any) => ({
+        id: product.id,
+        name: product.name,
+        description: product.description,
+        price: parseFloat(product.price),
+        image: product.image_url,
+        category: product.categories?.name || 'Non classé',
+        video_url: product.video_url
+      })) || [];
+      
+      set({ products: formattedProducts, loading: false });
     } catch (error) {
       set({ error: 'Erreur lors du chargement des produits', loading: false });
     }
@@ -101,14 +43,17 @@ export const useProducts = create<ProductsStore>((set, get) => ({
   addProduct: async (product) => {
     set({ loading: true });
     try {
-      const newProduct: Product = {
-        ...product,
-        id: Date.now().toString(),
+      const productData = {
+        name: product.name,
+        description: product.description,
+        price: product.price,
+        image_url: product.image,
+        category_id: null // À implémenter avec la sélection de catégorie
       };
-      set(state => ({
-        products: [...state.products, newProduct],
-        loading: false
-      }));
+      
+      await addProduit(productData);
+      // Recharger les produits après ajout
+      await get().fetchProducts();
     } catch (error) {
       set({ error: 'Erreur lors de l\'ajout du produit', loading: false });
     }
@@ -117,12 +62,16 @@ export const useProducts = create<ProductsStore>((set, get) => ({
   updateProduct: async (id, updatedProduct) => {
     set({ loading: true });
     try {
-      set(state => ({
-        products: state.products.map(product =>
-          product.id === id ? { ...product, ...updatedProduct } : product
-        ),
-        loading: false
-      }));
+      const productData = {
+        ...(updatedProduct.name && { name: updatedProduct.name }),
+        ...(updatedProduct.description && { description: updatedProduct.description }),
+        ...(updatedProduct.price && { price: updatedProduct.price }),
+        ...(updatedProduct.image && { image_url: updatedProduct.image }),
+      };
+      
+      await updateProduit(id, productData);
+      // Recharger les produits après modification
+      await get().fetchProducts();
     } catch (error) {
       set({ error: 'Erreur lors de la mise à jour du produit', loading: false });
     }
@@ -131,10 +80,9 @@ export const useProducts = create<ProductsStore>((set, get) => ({
   deleteProduct: async (id) => {
     set({ loading: true });
     try {
-      set(state => ({
-        products: state.products.filter(product => product.id !== id),
-        loading: false
-      }));
+      await deleteProduit(id);
+      // Recharger les produits après suppression
+      await get().fetchProducts();
     } catch (error) {
       set({ error: 'Erreur lors de la suppression du produit', loading: false });
     }

@@ -1,17 +1,34 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Sparkles, Leaf, Heart, Star, ArrowRight, ShoppingBag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import CategoryCard from '@/components/CategoryCard';
 import ProductCard from '@/components/ProductCard';
 import { useProducts } from '@/hooks/useProducts';
+import { getTestimonials } from '@/services/supabaseService';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 
 const Index = () => {
-  const { products } = useProducts();
+  const { products, fetchProducts } = useProducts();
+  const [testimonials, setTestimonials] = useState<any[]>([]);
   const featuredProducts = products.slice(0, 4);
+
+  useEffect(() => {
+    fetchProducts();
+    fetchTestimonialsData();
+  }, []);
+
+  const fetchTestimonialsData = async () => {
+    try {
+      const data = await getTestimonials();
+      setTestimonials(data?.slice(0, 6) || []);
+    } catch (error) {
+      console.error('Erreur chargement témoignages:', error);
+    }
+  };
 
   const categories = [
     {
@@ -81,7 +98,7 @@ const Index = () => {
               <div className="text-sm text-muted-foreground">Clients Satisfaits</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-luxury-gold mb-2">50+</div>
+              <div className="text-3xl font-bold text-luxury-gold mb-2">{products.length}+</div>
               <div className="text-sm text-muted-foreground">Produits</div>
             </div>
             <div className="text-center">
@@ -144,6 +161,64 @@ const Index = () => {
               <div key={product.id} className="animate-fade-in-up" style={{animationDelay: `${index * 0.1}s`}}>
                 <ProductCard product={product} />
               </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials Section */}
+      <section className="section-padding bg-cream-50 dark:bg-cream-100">
+        <div className="container-custom">
+          <div className="flex justify-between items-center mb-12">
+            <div>
+              <h2 className="text-section-title mb-4">Témoignages Clients</h2>
+              <p className="text-muted-foreground">
+                Découvrez ce que nos clients pensent de nos produits
+              </p>
+            </div>
+            <Link to="/testimonials">
+              <Button variant="outline" className="btn-outline-luxury">
+                Voir Tous les Avis
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {testimonials.map((testimonial, index) => (
+              <Card key={testimonial.id} className="card-product animate-fade-in-up" style={{animationDelay: `${index * 0.1}s`}}>
+                <CardContent className="p-6">
+                  <div className="flex items-center mb-4">
+                    <div className="flex space-x-1">
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} className="h-4 w-4 text-luxury-gold" fill="currentColor" />
+                      ))}
+                    </div>
+                  </div>
+                  
+                  <blockquote className="text-muted-foreground mb-4 italic">
+                    "{testimonial.message}"
+                  </blockquote>
+                  
+                  <div className="flex items-center">
+                    {testimonial.image_url ? (
+                      <img 
+                        src={testimonial.image_url} 
+                        alt={testimonial.name}
+                        className="w-10 h-10 rounded-full mr-3 object-cover"
+                      />
+                    ) : (
+                      <div className="w-10 h-10 rounded-full bg-luxury-gradient mr-3 flex items-center justify-center text-white font-semibold">
+                        {testimonial.name.charAt(0)}
+                      </div>
+                    )}
+                    <div>
+                      <p className="font-medium text-foreground">{testimonial.name}</p>
+                      <p className="text-sm text-muted-foreground">Client vérifié</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             ))}
           </div>
         </div>

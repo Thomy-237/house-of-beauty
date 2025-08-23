@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { ShoppingBag, Menu, X, User, Sun, Moon } from 'lucide-react';
+import { Menu, X, ShoppingBag, Search, Sun, Moon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/hooks/useCart';
 import { useTheme } from 'next-themes';
@@ -12,33 +12,33 @@ const Header = () => {
   const location = useLocation();
   const { theme, setTheme } = useTheme();
 
-  const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
+  const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
 
   const navigation = [
     { name: 'Accueil', href: '/' },
-    { name: 'Produits', href: '/products' },
+    { name: 'Boutique', href: '/products' },
+    { name: 'À Propos', href: '/about' },
+    { name: 'Témoignages', href: '/testimonials' },
     { name: 'Contact', href: '/contact' },
   ];
 
-  const isActive = (path: string) => location.pathname === path;
+  const isActivePath = (path: string) => {
+    if (path === '/') {
+      return location.pathname === '/';
+    }
+    return location.pathname.startsWith(path);
+  };
 
   return (
-    <header className="bg-background/95 backdrop-blur-md border-b border-border sticky top-0 z-50">
+    <header className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
       <div className="container-custom">
-        <div className="flex items-center justify-between py-4">
+        <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
-            <div className="w-10 h-10 bg-luxury-gradient rounded-full flex items-center justify-center">
-              <span className="text-white font-luxury font-bold text-lg">H</span>
+            <div className="w-8 h-8 bg-luxury-gradient rounded-full flex items-center justify-center">
+              <span className="text-white font-bold text-sm">HB</span>
             </div>
-            <div>
-              <h1 className="font-luxury text-xl font-bold text-foreground">
-                House Of Beauty
-              </h1>
-              <p className="text-xs text-muted-foreground font-modern">
-                Cosmétiques Naturels
-              </p>
-            </div>
+            <span className="font-bold text-xl text-luxury-heading">House Of Beauty</span>
           </Link>
 
           {/* Desktop Navigation */}
@@ -47,81 +47,99 @@ const Header = () => {
               <Link
                 key={item.name}
                 to={item.href}
-                className={`nav-link ${isActive(item.href) ? 'text-luxury-gold' : ''}`}
+                className={`text-sm font-medium transition-colors hover:text-luxury-gold ${
+                  isActivePath(item.href) 
+                    ? 'text-luxury-gold' 
+                    : 'text-muted-foreground'
+                }`}
               >
                 {item.name}
               </Link>
             ))}
           </nav>
 
-          {/* Actions */}
-          <div className="flex items-center space-x-4">
-            {/* Theme Toggle */}
+          {/* Desktop Actions */}
+          <div className="hidden md:flex items-center space-x-4">
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-              className="w-9 h-9"
             >
-              <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-              <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-              <span className="sr-only">Toggle theme</span>
+              {theme === 'dark' ? (
+                <Sun className="h-4 w-4" />
+              ) : (
+                <Moon className="h-4 w-4" />
+              )}
             </Button>
-
-            {/* Cart */}
-            <Link to="/cart" className="relative">
-              <Button variant="ghost" size="icon" className="w-9 h-9">
-                <ShoppingBag className="h-5 w-5" />
-                {totalItems > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-luxury-gold text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium">
-                    {totalItems}
+            <Button variant="ghost" size="icon">
+              <Search className="h-4 w-4" />
+            </Button>
+            <Link to="/cart">
+              <Button variant="ghost" size="icon" className="relative">
+                <ShoppingBag className="h-4 w-4" />
+                {itemCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-luxury-gold text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                    {itemCount}
                   </span>
                 )}
               </Button>
             </Link>
-
-            {/* Admin Access */}
-            <Link to="/admin">
-              <Button variant="ghost" size="icon" className="w-9 h-9">
-                <User className="h-5 w-5" />
-              </Button>
-            </Link>
-
-            {/* Mobile Menu Toggle */}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="md:hidden w-9 h-9"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-            >
-              {isMenuOpen ? (
-                <X className="h-5 w-5" />
-              ) : (
-                <Menu className="h-5 w-5" />
-              )}
-            </Button>
           </div>
+
+          {/* Mobile menu button */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="md:hidden"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+          >
+            {isMenuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+          </Button>
         </div>
 
         {/* Mobile Navigation */}
         {isMenuOpen && (
-          <div className="md:hidden border-t border-border bg-background">
-            <nav className="py-4 space-y-2">
-              {navigation.map((item) => (
-                <Link
-                  key={item.name}
-                  to={item.href}
-                  className={`block px-4 py-2 text-base font-medium rounded-lg transition-colors ${
-                    isActive(item.href)
-                      ? 'bg-luxury-gold/10 text-luxury-gold'
-                      : 'text-foreground hover:bg-cream-100'
-                  }`}
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  {item.name}
-                </Link>
-              ))}
-            </nav>
+          <div className="md:hidden py-4 space-y-4 border-t border-border">
+            {navigation.map((item) => (
+              <Link
+                key={item.name}
+                to={item.href}
+                className={`block text-sm font-medium transition-colors hover:text-luxury-gold ${
+                  isActivePath(item.href) 
+                    ? 'text-luxury-gold' 
+                    : 'text-muted-foreground'
+                }`}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                {item.name}
+              </Link>
+            ))}
+            <div className="flex items-center space-x-4 pt-4 border-t border-border">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+              >
+                {theme === 'dark' ? (
+                  <Sun className="h-4 w-4" />
+                ) : (
+                  <Moon className="h-4 w-4" />
+                )}
+              </Button>
+              <Button variant="ghost" size="icon">
+                <Search className="h-4 w-4" />
+              </Button>
+              <Link to="/cart">
+                <Button variant="ghost" size="icon" className="relative">
+                  <ShoppingBag className="h-4 w-4" />
+                  {itemCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-luxury-gold text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                      {itemCount}
+                    </span>
+                  )}
+                </Button>
+              </Link>
+            </div>
           </div>
         )}
       </div>

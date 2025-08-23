@@ -6,25 +6,33 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import ProductCard from '@/components/ProductCard';
 import { useProducts } from '@/hooks/useProducts';
+import { getCategories } from '@/services/supabaseService';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { useSearchParams } from 'react-router-dom';
 
 const Products = () => {
-  const { products, loading } = useProducts();
+  const { products, loading, fetchProducts } = useProducts();
+  const [categories, setCategories] = useState<any[]>([]);
   const [searchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [sortBy, setSortBy] = useState('name');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
-  const categories = [
-    { value: 'all', label: 'Toutes les catégories' },
-    { value: 'soins-visage', label: 'Soins du visage' },
-    { value: 'cheveux', label: 'Soins des cheveux' },
-    { value: 'maquillage', label: 'Maquillage' },
-    { value: 'soins-corps', label: 'Soins du corps' },
-  ];
+  useEffect(() => {
+    fetchProducts();
+    fetchCategories();
+  }, []);
+
+  const fetchCategories = async () => {
+    try {
+      const data = await getCategories();
+      setCategories(data || []);
+    } catch (error) {
+      console.error('Erreur chargement catégories:', error);
+    }
+  };
 
   // Check URL params for category filter
   useEffect(() => {
@@ -53,6 +61,11 @@ const Products = () => {
           return a.name.localeCompare(b.name);
       }
     });
+
+  const categoryOptions = [
+    { value: 'all', label: 'Toutes les catégories' },
+    ...categories.map(cat => ({ value: cat.name, label: cat.name }))
+  ];
 
   return (
     <div className="min-h-screen bg-background">
@@ -94,7 +107,7 @@ const Products = () => {
                   <SelectValue placeholder="Catégorie" />
                 </SelectTrigger>
                 <SelectContent>
-                  {categories.map((category) => (
+                  {categoryOptions.map((category) => (
                     <SelectItem key={category.value} value={category.value}>
                       {category.label}
                     </SelectItem>
