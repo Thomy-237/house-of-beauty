@@ -1,9 +1,60 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Phone, Mail, MapPin, Facebook, Instagram, Twitter } from 'lucide-react';
 
+interface ContactInfo {
+  phone: string;
+  email: string;
+  address: string;
+}
+
+interface SocialLink {
+  id: string;
+  platform: string;
+  url: string;
+  icon: string;
+}
+
 const Footer = () => {
+  const [contactInfo, setContactInfo] = useState<ContactInfo>({
+    phone: '+18103552682',
+    email: 'mirakosmetics@gmail.com',
+    address: '123 Rue de la Beauté, 75001 Paris, France'
+  });
+
+  const [socialLinks, setSocialLinks] = useState<SocialLink[]>([
+    { id: '1', platform: 'Facebook', url: 'https://facebook.com', icon: 'Facebook' },
+    { id: '2', platform: 'Instagram', url: 'https://instagram.com', icon: 'Instagram' },
+    { id: '3', platform: 'Twitter', url: 'https://twitter.com', icon: 'Twitter' }
+  ]);
+
+  useEffect(() => {
+    // Charger les informations de contact depuis le localStorage
+    const savedContactInfo = localStorage.getItem('siteContactInfo');
+    const savedSocialLinks = localStorage.getItem('siteSocialLinks');
+
+    if (savedContactInfo) {
+      setContactInfo(JSON.parse(savedContactInfo));
+    }
+    if (savedSocialLinks) {
+      setSocialLinks(JSON.parse(savedSocialLinks));
+    }
+  }, []);
+
+  const getIconComponent = (iconName: string) => {
+    switch (iconName.toLowerCase()) {
+      case 'facebook':
+        return Facebook;
+      case 'instagram':
+        return Instagram;
+      case 'twitter':
+        return Twitter;
+      default:
+        return Facebook; // Icône par défaut
+    }
+  };
+
   return (
     <footer className="bg-cream-900 dark:bg-background text-cream-50 dark:text-foreground">
       <div className="container-custom section-padding">
@@ -21,15 +72,20 @@ const Footer = () => {
               Découvrez notre gamme de produits de beauté authentiques et respectueux de l'environnement.
             </p>
             <div className="flex space-x-4">
-              <a href="#" className="text-cream-200 hover:text-luxury-gold transition-colors">
-                <Facebook className="h-5 w-5" />
-              </a>
-              <a href="#" className="text-cream-200 hover:text-luxury-gold transition-colors">
-                <Instagram className="h-5 w-5" />
-              </a>
-              <a href="#" className="text-cream-200 hover:text-luxury-gold transition-colors">
-                <Twitter className="h-5 w-5" />
-              </a>
+              {socialLinks.map((link) => {
+                const IconComponent = getIconComponent(link.icon);
+                return (
+                  <a 
+                    key={link.id}
+                    href={link.url} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-cream-200 hover:text-luxury-gold transition-colors"
+                  >
+                    <IconComponent className="h-5 w-5" />
+                  </a>
+                );
+              })}
             </div>
           </div>
 
@@ -53,9 +109,9 @@ const Footer = () => {
                 </Link>
               </li>
               <li>
-                <a href="#" className="text-cream-200 dark:text-muted-foreground hover:text-luxury-gold transition-colors text-sm">
-                  À Propos
-                </a>
+                <Link to="/testimonials" className="text-cream-200 dark:text-muted-foreground hover:text-luxury-gold transition-colors text-sm">
+                  Témoignages
+                </Link>
               </li>
             </ul>
           </div>
@@ -65,24 +121,24 @@ const Footer = () => {
             <h4 className="font-luxury text-lg font-semibold">Catégories</h4>
             <ul className="space-y-2">
               <li>
-                <a href="#" className="text-cream-200 dark:text-muted-foreground hover:text-luxury-gold transition-colors text-sm">
+                <Link to="/products?category=Soins du Visage" className="text-cream-200 dark:text-muted-foreground hover:text-luxury-gold transition-colors text-sm">
                   Soins du Visage
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-cream-200 dark:text-muted-foreground hover:text-luxury-gold transition-colors text-sm">
+                <Link to="/products?category=Soins des Cheveux" className="text-cream-200 dark:text-muted-foreground hover:text-luxury-gold transition-colors text-sm">
                   Soins des Cheveux
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-cream-200 dark:text-muted-foreground hover:text-luxury-gold transition-colors text-sm">
+                <Link to="/products?category=Maquillage" className="text-cream-200 dark:text-muted-foreground hover:text-luxury-gold transition-colors text-sm">
                   Maquillage
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-cream-200 dark:text-muted-foreground hover:text-luxury-gold transition-colors text-sm">
+                <Link to="/products?category=Parfums" className="text-cream-200 dark:text-muted-foreground hover:text-luxury-gold transition-colors text-sm">
                   Parfums
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
@@ -95,7 +151,7 @@ const Footer = () => {
                 <Phone className="h-4 w-4 text-luxury-gold mt-1 flex-shrink-0" />
                 <div>
                   <p className="text-cream-200 dark:text-muted-foreground text-sm">
-                    +33 1 23 45 67 89
+                    {contactInfo.phone}
                   </p>
                   <p className="text-xs text-cream-300 dark:text-muted-foreground/70">
                     Lun - Ven: 9h - 18h
@@ -107,7 +163,7 @@ const Footer = () => {
                 <Mail className="h-4 w-4 text-luxury-gold mt-1 flex-shrink-0" />
                 <div>
                   <p className="text-cream-200 dark:text-muted-foreground text-sm">
-                    contact@houseofbeauty.fr
+                    {contactInfo.email}
                   </p>
                   <p className="text-xs text-cream-300 dark:text-muted-foreground/70">
                     Réponse sous 24h
@@ -119,10 +175,7 @@ const Footer = () => {
                 <MapPin className="h-4 w-4 text-luxury-gold mt-1 flex-shrink-0" />
                 <div>
                   <p className="text-cream-200 dark:text-muted-foreground text-sm">
-                    123 Rue de la Beauté
-                  </p>
-                  <p className="text-cream-200 dark:text-muted-foreground text-sm">
-                    75001 Paris, France
+                    {contactInfo.address}
                   </p>
                 </div>
               </div>

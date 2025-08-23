@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -9,17 +9,25 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { ShoppingCart, CreditCard, Phone } from 'lucide-react';
 import { useCart } from '@/hooks/useCart';
 import { useCurrency } from '@/contexts/CurrencyContext';
+import CountrySelector from '@/components/CountrySelector';
 import { toast } from 'sonner';
+
+interface PaymentMethod {
+  id: string;
+  name: string;
+  description?: string;
+}
 
 const CheckoutForm = () => {
   const { items, getTotalPrice } = useCart();
   const { formatPrice } = useCurrency();
   const [isOpen, setIsOpen] = useState(false);
+  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
   
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
-    email: 'mirakosmetics@gmail.com',
+    email: '',
     phone: '',
     address: '',
     city: '',
@@ -30,11 +38,34 @@ const CheckoutForm = () => {
 
   const totalPrice = getTotalPrice();
 
+  // Charger les moyens de paiement depuis le localStorage
+  useEffect(() => {
+    const savedPaymentMethods = localStorage.getItem('sitePaymentMethods');
+    if (savedPaymentMethods) {
+      setPaymentMethods(JSON.parse(savedPaymentMethods));
+    } else {
+      // Moyens de paiement par défaut
+      setPaymentMethods([
+        { id: '1', name: 'Mobile Money', description: 'Paiement via mobile money' },
+        { id: '2', name: 'Virement bancaire', description: 'Virement bancaire sécurisé' },
+        { id: '3', name: 'Espèces à la livraison', description: 'Paiement en liquide' },
+        { id: '4', name: 'Carte bancaire', description: 'Paiement par carte' }
+      ]);
+    }
+  }, []);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.firstName || !formData.lastName || !formData.phone || !formData.address || !formData.paymentMethod) {
+    if (!formData.firstName || !formData.lastName || !formData.email || !formData.phone || !formData.address || !formData.country || !formData.paymentMethod) {
       toast.error('Veuillez remplir tous les champs obligatoires');
+      return;
+    }
+
+    // Validation email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      toast.error('Veuillez saisir une adresse email valide');
       return;
     }
 
@@ -42,6 +73,8 @@ const CheckoutForm = () => {
     const orderDetails = items.map(item => 
       `• ${item.name} x${item.quantity} - ${formatPrice(item.price * item.quantity)}`
     ).join('\n');
+
+    const selectedPaymentMethod = paymentMethods.find(pm => pm.id === formData.paymentMethod);
 
     const message = `🛍️ *NOUVELLE COMMANDE - HOUSE OF BEAUTY*
 
@@ -57,10 +90,10 @@ ${orderDetails}
 
 📍 *Adresse de livraison :*
 ${formData.address}
-${formData.city}, ${formData.postalCode}
+${formData.city}${formData.postalCode ? `, ${formData.postalCode}` : ''}
 ${formData.country}
 
-💳 *Moyen de paiement souhaité :* ${formData.paymentMethod}
+💳 *Moyen de paiement souhaité :* ${selectedPaymentMethod?.name || formData.paymentMethod}
 
 Merci de confirmer cette commande !`;
 
@@ -145,14 +178,13 @@ Merci de confirmer cette commande !`;
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-2">Email</label>
+              <label className="block text-sm font-medium mb-2">Email *</label>
               <Input
                 type="email"
                 value={formData.email}
                 onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
                 placeholder="votre@email.com"
-                readOnly
-                className="bg-muted"
+                required
               />
             </div>
             <div>
@@ -198,11 +230,10 @@ Merci de confirmer cette commande !`;
             </div>
             <div>
               <label className="block text-sm font-medium mb-2">Pays *</label>
-              <Input
+              <CountrySelector
                 value={formData.country}
-                onChange={(e) => setFormData(prev => ({ ...prev, country: e.target.value }))}
-                placeholder="France"
-                required
+                onChange={(value) => setFormData(prev => ({ ...prev, country: value }))}
+                placeholder="Sélectionnez votre pays"
               />
             </div>
           </div>
@@ -215,10 +246,16 @@ Merci de confirmer cette commande !`;
                 <SelectValue placeholder="Choisissez votre moyen de paiement" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="mobile-money">Mobile Money</SelectItem>
-                <SelectItem value="virement">Virement bancaire</SelectItem>
-                <SelectItem value="especes">Espèces à la livraison</SelectItem>
-                <SelectItem value="carte">Carte bancaire</SelectItem>
+                {paymentMethods.map((method) => (
+                  <SelectItem key={method.id} value={method.id}>
+                    <div>
+                      <div className="font-medium">{method.name}</div>
+                      {method.description && (
+                        <div className="text-xs text-muted-foreground">{method.description}</div>
+                      )}
+                    </div>
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>

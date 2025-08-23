@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Lock, LogOut, Plus, Edit, Trash2, Eye, EyeOff, CheckCircle, XCircle, MessageSquare } from 'lucide-react';
@@ -15,6 +14,7 @@ import { Product } from '@/hooks/useCart';
 import { getCategories, getTestimonials, addCategory, updateProduit, deleteProduit, addProduit } from '@/services/supabaseService';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import SiteSettingsTab from '@/components/admin/SiteSettingsTab';
 import { toast } from 'sonner';
 
 const Admin = () => {
@@ -269,10 +269,11 @@ const Admin = () => {
       <section className="section-padding">
         <div className="container-custom">
           <Tabs defaultValue="products" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="products">Produits ({products.length})</TabsTrigger>
               <TabsTrigger value="categories">Catégories ({categories.length})</TabsTrigger>
               <TabsTrigger value="testimonials">Témoignages ({testimonials.length})</TabsTrigger>
+              <TabsTrigger value="settings">Paramètres</TabsTrigger>
             </TabsList>
 
             <TabsContent value="products" className="space-y-6">
@@ -537,6 +538,12 @@ const Admin = () => {
                   </Card>
                 ))}
               </div>
+            </TabsContent>
+            <TabsContent value="settings" className="space-y-6">
+              <div className="flex justify-between items-center">
+                <h2 className="text-2xl font-semibold">Paramètres du Site</h2>
+              </div>
+              <SiteSettingsTab />
             </TabsContent>
           </Tabs>
         </div>
