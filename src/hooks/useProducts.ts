@@ -31,7 +31,7 @@ export const useProducts = create<ProductsStore>((set, get) => ({
         price: parseFloat(product.price),
         image: product.image_url,
         category: product.categories?.name || 'Non classé',
-        video_url: product.video_url
+        video_url: product.video_url || undefined
       })) || [];
       
       set({ products: formattedProducts, loading: false });

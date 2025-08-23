@@ -1,4 +1,3 @@
-
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
@@ -9,6 +8,7 @@ export interface Product {
   image: string;
   description: string;
   category: string;
+  video_url?: string;
 }
 
 export interface CartItem extends Product {
