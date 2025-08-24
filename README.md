@@ -1,73 +1,250 @@
-# Welcome to your Lovable project
 
-## Project info
+# House of Beauty - Site E-commerce de Cosmétiques
 
-**URL**: https://lovable.dev/projects/4da5285d-66e1-4de7-b1b8-6144b8cddb02
+## 🌟 À propos
 
-## How can I edit this code?
+House of Beauty est un site e-commerce moderne spécialisé dans les cosmétiques et produits de beauté naturels de luxe. Le site offre une expérience utilisateur premium avec un design élégant et des fonctionnalités avancées.
 
-There are several ways of editing your application.
+## 🚀 Fonctionnalités
 
-**Use Lovable**
+- **Catalogue produits** avec recherche et filtres avancés
+- **Panier d'achat** intelligent avec persistance
+- **Système de commande** via WhatsApp intégré
+- **Témoignages clients** avec système de vérification
+- **Administration complète** pour gérer le contenu
+- **Design responsive** et optimisé mobile
+- **Thème personnalisable** facilement
+- **Performance optimisée** (Core Web Vitals)
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/4da5285d-66e1-4de7-b1b8-6144b8cddb02) and start prompting.
+## 📋 Prérequis
 
-Changes made via Lovable will be committed automatically to this repo.
+- Node.js 18+ 
+- npm ou yarn
+- Compte Supabase (pour la base de données)
 
-**Use your preferred IDE**
+## 🛠 Installation
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+1. **Cloner le projet**
+```bash
+git clone <url-du-repo>
+cd house-of-beauty
+```
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+2. **Installer les dépendances**
+```bash
+npm install
+```
 
-Follow these steps:
+3. **Configuration de l'environnement**
+```bash
+cp .env.example .env
+```
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+Remplir les variables dans `.env` :
+```env
+VITE_SUPABASE_URL=https://votre-projet.supabase.co
+VITE_SUPABASE_ANON_KEY=votre-cle-publique-supabase
+```
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+4. **Démarrer le serveur de développement**
+```bash
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+Le site sera accessible sur `http://localhost:5173`
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## 🏗 Build et déploiement
 
-**Use GitHub Codespaces**
+### Build de production
+```bash
+npm run build
+```
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+### Prévisualisation du build
+```bash
+npm run preview
+```
 
-## What technologies are used for this project?
+### Déploiement
 
-This project is built with:
+Le site peut être déployé sur :
+- **Vercel** (recommandé)
+- **Netlify** 
+- **Hébergement classique** (Apache/Nginx)
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+#### Déploiement Vercel
+```bash
+npm install -g vercel
+vercel --prod
+```
 
-## How can I deploy this project?
+#### Hébergement classique
+1. Exécuter `npm run build`
+2. Uploader le contenu du dossier `dist/` sur votre serveur
+3. Configurer le serveur pour servir `index.html` pour toutes les routes
 
-Simply open [Lovable](https://lovable.dev/projects/4da5285d-66e1-4de7-b1b8-6144b8cddb02) and click on Share -> Publish.
+## 📁 Structure du projet
 
-## Can I connect a custom domain to my Lovable project?
+```
+src/
+├── components/          # Composants réutilisables
+│   ├── ui/             # Composants UI de base
+│   ├── admin/          # Composants d'administration
+│   └── ...
+├── pages/              # Pages principales
+├── hooks/              # Hooks personnalisés
+├── services/           # Services API
+├── config/             # Configuration du site
+│   ├── site.config.ts  # Configuration générale
+│   └── theme.config.ts # Configuration du thème
+├── integrations/       # Intégrations externes
+└── styles/            # Styles globaux
+```
 
-Yes, you can!
+## 🎨 Personnalisation
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+### Modifier les couleurs et le thème
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+Éditer `src/config/theme.config.ts` :
+
+```typescript
+export const themeConfig = {
+  colors: {
+    primary: {
+      500: 'hsl(35, 91%, 50%)', // Couleur principale
+      // ...
+    },
+    luxury: {
+      gold: 'hsl(45, 85%, 58%)', // Or de luxe
+      // ...
+    }
+  }
+}
+```
+
+### Modifier les informations du site
+
+Éditer `src/config/site.config.ts` :
+
+```typescript
+export const siteConfig = {
+  name: "Votre Nom de Site",
+  contact: {
+    phone: "+33123456789",
+    email: "votre@email.com",
+    whatsapp: "+33123456789"
+  }
+  // ...
+}
+```
+
+### Remplacer les images par défaut
+
+1. Placer vos images dans `public/`
+2. Modifier les chemins dans `src/config/site.config.ts`
+
+```typescript
+assets: {
+  logo: "/votre-logo.png",
+  favicon: "/votre-favicon.ico",
+  heroImage: "/votre-hero.jpg"
+}
+```
+
+## 🔧 Administration
+
+Accéder à l'interface d'administration via `/admin` pour gérer :
+
+- **Produits** : Ajouter, modifier, supprimer
+- **Catégories** : Organiser les produits
+- **Témoignages** : Modérer les avis clients
+- **Paramètres du site** : Contact, paiements, réseaux sociaux
+
+## 🛒 Fonctionnement des commandes
+
+1. **Client ajoute des produits** au panier
+2. **Remplit le formulaire** de commande
+3. **Sélectionne pays et méthode** de paiement
+4. **Clic "Finaliser"** → Redirection WhatsApp automatique
+5. **Message généré** avec tous les détails
+6. **Traitement manuel** via WhatsApp
+
+## 🔍 SEO et performance
+
+### Optimisations incluses
+- Meta tags dynamiques
+- Images optimisées avec lazy loading
+- Code splitting automatique
+- Compression des assets
+- Cache headers configurés
+
+### Améliorer le référencement
+1. Remplir les meta descriptions dans chaque page
+2. Ajouter un sitemap.xml
+3. Configurer Google Analytics
+4. Optimiser les images (WebP recommandé)
+
+## 🚨 Résolution des problèmes
+
+### Images qui ne s'affichent pas
+- Vérifier les chemins dans `/public/`
+- Utiliser le composant `ImageWithFallback`
+- S'assurer que les formats sont supportés
+
+### Erreurs de build
+```bash
+# Nettoyer le cache
+rm -rf node_modules package-lock.json
+npm install
+
+# Vérifier les types TypeScript
+npm run type-check
+```
+
+### Problèmes de performance
+- Optimiser les images (compression, format WebP)
+- Réduire les bundles JavaScript
+- Utiliser le lazy loading
+
+## 📦 Dépendances principales
+
+- **React 18** - Framework UI
+- **TypeScript** - Typage statique  
+- **Tailwind CSS** - Styling
+- **Zustand** - Gestion d'état
+- **React Router** - Navigation
+- **Supabase** - Backend et base de données
+- **Vite** - Build tool moderne
+
+## 📄 Licences
+
+- **Code** : MIT License
+- **Design** : Usage commercial autorisé
+- **Images par défaut** : Placeholder images (remplacer en production)
+- **Icônes** : Lucide React (MIT License)
+
+## 🤝 Support
+
+Pour toute question technique :
+1. Vérifier la documentation
+2. Consulter les logs dans la console
+3. Vérifier les configurations Supabase
+
+## 📊 Monitoring
+
+### Métriques à surveiller
+- Core Web Vitals (LCP, FID, CLS)
+- Temps de chargement des pages
+- Taux de conversion du panier
+- Erreurs JavaScript
+
+### Outils recommandés
+- Google PageSpeed Insights
+- Google Analytics
+- Supabase Dashboard pour la DB
+
+---
+
+**Version** : 1.0.0  
+**Dernière mise à jour** : Janvier 2024  
+**Contact** : mirakosmetics@gmail.com

@@ -1,27 +1,17 @@
 
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Menu, X, Search, ShoppingCart, Phone, Mail } from 'lucide-react';
+import { ShoppingCart, Menu, X, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { useCart } from '@/hooks/useCart';
-import CurrencySelector from '@/components/CurrencySelector';
+import { Link, useLocation } from 'react-router-dom';
+import SearchBar from '@/components/SearchBar';
+import ImageWithFallback from '@/components/ui/image-with-fallback';
+import { siteConfig } from '@/config/site.config';
 
 const Header = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const { items } = useCart();
-  const navigate = useNavigate();
-
-  const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(`/products?search=${encodeURIComponent(searchQuery.trim())}`);
-      setSearchQuery('');
-    }
-  };
+  const { getTotalItems } = useCart();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const location = useLocation();
 
   const navigation = [
     { name: 'Accueil', href: '/' },
@@ -30,144 +20,123 @@ const Header = () => {
     { name: 'Contact', href: '/contact' },
   ];
 
-  return (
-    <header className="bg-background border-b border-border sticky top-0 z-50">
-      {/* Top bar */}
-      <div className="bg-luxury-gradient text-white py-2">
-        <div className="container-custom">
-          <div className="flex justify-between items-center text-sm">
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-1">
-                <Phone className="h-3 w-3" />
-                <span>+18103552682</span>
-              </div>
-              <div className="flex items-center space-x-1">
-                <Mail className="h-3 w-3" />
-                <span>mirakosmetics@gmail.com</span>
-              </div>
-            </div>
-            <div className="hidden md:block">
-              <CurrencySelector />
-            </div>
-          </div>
-        </div>
-      </div>
+  const isActivePath = (path: string) => {
+    if (path === '/' && location.pathname === '/') return true;
+    if (path !== '/' && location.pathname.startsWith(path)) return true;
+    return false;
+  };
 
-      {/* Main header */}
+  return (
+    <header className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border-b border-border sticky top-0 z-50">
       <div className="container-custom">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2">
-            <div className="w-10 h-10 bg-luxury-gradient rounded-full flex items-center justify-center">
-              <span className="text-white font-bold text-lg">H</span>
-            </div>
-            <span className="text-xl font-bold text-luxury-gold">House Of Beauty</span>
+          <Link to="/" className="flex items-center space-x-3">
+            <ImageWithFallback
+              src={siteConfig.assets.logo}
+              alt={siteConfig.name}
+              className="h-10 w-10 rounded-lg"
+              showLoader={false}
+            />
+            <span className="text-luxury-heading font-bold text-xl hidden sm:block">
+              {siteConfig.name}
+            </span>
           </Link>
 
-          {/* Search bar - Desktop */}
-          <div className="hidden lg:flex flex-1 max-w-md mx-8">
-            <form onSubmit={handleSearch} className="flex w-full">
-              <Input
-                type="search"
-                placeholder="Rechercher un produit..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="rounded-r-none border-r-0"
-              />
-              <Button
-                type="submit"
-                size="icon"
-                className="rounded-l-none bg-luxury-gold hover:bg-luxury-gold/90"
-              >
-                <Search className="h-4 w-4" />
-              </Button>
-            </form>
-          </div>
-
-          {/* Desktop Navigation */}
+          {/* Navigation desktop */}
           <nav className="hidden lg:flex items-center space-x-8">
             {navigation.map((item) => (
               <Link
                 key={item.name}
                 to={item.href}
-                className="text-foreground hover:text-luxury-gold transition-colors font-medium"
+                className={`text-sm font-medium transition-colors hover:text-luxury-gold ${
+                  isActivePath(item.href)
+                    ? 'text-luxury-gold'
+                    : 'text-foreground'
+                }`}
               >
                 {item.name}
               </Link>
             ))}
           </nav>
 
-          {/* Cart and Mobile menu */}
-          <div className="flex items-center space-x-4">
-            {/* Currency selector mobile */}
-            <div className="md:hidden">
-              <CurrencySelector />
-            </div>
+          {/* Barre de recherche */}
+          <div className="hidden md:flex flex-1 max-w-sm mx-6">
+            <SearchBar />
+          </div>
 
-            {/* Cart */}
-            <Link to="/cart" className="relative">
-              <Button variant="ghost" size="icon" className="hover:bg-luxury-gold/10">
+          {/* Actions */}
+          <div className="flex items-center space-x-4">
+            {/* Admin (caché par défaut, visible selon conditions) */}
+            <Link to="/admin" className="hidden">
+              <Button variant="ghost" size="icon">
+                <User className="h-5 w-5" />
+              </Button>
+            </Link>
+
+            {/* Panier */}
+            <Link to="/cart">
+              <Button variant="ghost" size="icon" className="relative">
                 <ShoppingCart className="h-5 w-5" />
-                {itemCount > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-luxury-gold text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                    {itemCount}
+                {getTotalItems() > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-luxury-gold text-luxury-brown text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium">
+                    {getTotalItems()}
                   </span>
                 )}
               </Button>
             </Link>
 
-            {/* Mobile menu button */}
+            {/* Menu mobile */}
             <Button
               variant="ghost"
               size="icon"
               className="lg:hidden"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              onClick={() => setIsMobileMenuOpen(true)}
             >
-              {isMenuOpen ? (
-                <X className="h-5 w-5" />
-              ) : (
-                <Menu className="h-5 w-5" />
-              )}
+              <Menu className="h-5 w-5" />
             </Button>
           </div>
         </div>
 
-        {/* Mobile Search */}
-        <div className="lg:hidden pb-4">
-          <form onSubmit={handleSearch} className="flex">
-            <Input
-              type="search"
-              placeholder="Rechercher un produit..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="rounded-r-none border-r-0"
-            />
-            <Button
-              type="submit"
-              size="icon"
-              className="rounded-l-none bg-luxury-gold hover:bg-luxury-gold/90"
-            >
-              <Search className="h-4 w-4" />
-            </Button>
-          </form>
+        {/* Barre de recherche mobile */}
+        <div className="md:hidden py-3 border-t border-border">
+          <SearchBar />
         </div>
       </div>
 
-      {/* Mobile Navigation */}
-      {isMenuOpen && (
-        <div className="lg:hidden bg-background border-t border-border">
-          <nav className="container-custom py-4 space-y-4">
-            {navigation.map((item) => (
-              <Link
-                key={item.name}
-                to={item.href}
-                className="block text-foreground hover:text-luxury-gold transition-colors font-medium py-2"
-                onClick={() => setIsMenuOpen(false)}
+      {/* Menu mobile */}
+      {isMobileMenuOpen && (
+        <div className="fixed inset-0 z-50 lg:hidden">
+          <div className="fixed inset-0 bg-black/20" onClick={() => setIsMobileMenuOpen(false)} />
+          <div className="fixed right-0 top-0 h-full w-full max-w-sm bg-white dark:bg-gray-900 p-6 shadow-xl">
+            <div className="flex items-center justify-between mb-8">
+              <span className="text-luxury-heading font-bold text-xl">Menu</span>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setIsMobileMenuOpen(false)}
               >
-                {item.name}
-              </Link>
-            ))}
-          </nav>
+                <X className="h-5 w-5" />
+              </Button>
+            </div>
+            
+            <nav className="space-y-4">
+              {navigation.map((item) => (
+                <Link
+                  key={item.name}
+                  to={item.href}
+                  className={`block text-lg font-medium transition-colors hover:text-luxury-gold ${
+                    isActivePath(item.href)
+                      ? 'text-luxury-gold'
+                      : 'text-foreground'
+                  }`}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  {item.name}
+                </Link>
+              ))}
+            </nav>
+          </div>
         </div>
       )}
     </header>

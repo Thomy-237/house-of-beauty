@@ -5,47 +5,23 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus, Trash2, Save, Phone, Mail, MapPin, Globe } from 'lucide-react';
+import { Plus, Trash2, Save, Phone, Mail, MapPin, Globe, ExternalLink } from 'lucide-react';
 import { toast } from 'sonner';
-
-interface PaymentMethod {
-  id: string;
-  name: string;
-  description?: string;
-}
-
-interface SocialLink {
-  id: string;
-  platform: string;
-  url: string;
-  icon: string;
-}
-
-interface ContactInfo {
-  phone: string;
-  email: string;
-  address: string;
-}
+import { useSiteSettings } from '@/hooks/useSiteSettings';
 
 const SiteSettingsTab = () => {
-  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([
-    { id: '1', name: 'Mobile Money', description: 'Paiement via mobile money' },
-    { id: '2', name: 'Virement bancaire', description: 'Virement bancaire sécurisé' },
-    { id: '3', name: 'Espèces à la livraison', description: 'Paiement en liquide' },
-    { id: '4', name: 'Carte bancaire', description: 'Paiement par carte' }
-  ]);
-
-  const [socialLinks, setSocialLinks] = useState<SocialLink[]>([
-    { id: '1', platform: 'Facebook', url: 'https://facebook.com', icon: 'Facebook' },
-    { id: '2', platform: 'Instagram', url: 'https://instagram.com', icon: 'Instagram' },
-    { id: '3', platform: 'Twitter', url: 'https://twitter.com', icon: 'Twitter' }
-  ]);
-
-  const [contactInfo, setContactInfo] = useState<ContactInfo>({
-    phone: '+18103552682',
-    email: 'mirakosmetics@gmail.com',
-    address: '123 Rue de la Beauté, 75001 Paris, France'
-  });
+  const {
+    contactInfo,
+    socialLinks,
+    paymentMethods,
+    updateContactInfo,
+    addSocialLink,
+    removeSocialLink,
+    addPaymentMethod,
+    removePaymentMethod,
+    updateSocialLinks,
+    updatePaymentMethods
+  } = useSiteSettings();
 
   const [newPaymentMethod, setNewPaymentMethod] = useState({ name: '', description: '' });
   const [newSocialLink, setNewSocialLink] = useState({ platform: '', url: '' });
@@ -56,20 +32,9 @@ const SiteSettingsTab = () => {
       return;
     }
 
-    const newMethod: PaymentMethod = {
-      id: Date.now().toString(),
-      name: newPaymentMethod.name,
-      description: newPaymentMethod.description
-    };
-
-    setPaymentMethods([...paymentMethods, newMethod]);
+    addPaymentMethod(newPaymentMethod);
     setNewPaymentMethod({ name: '', description: '' });
     toast.success('Moyen de paiement ajouté !');
-  };
-
-  const handleRemovePaymentMethod = (id: string) => {
-    setPaymentMethods(paymentMethods.filter(method => method.id !== id));
-    toast.success('Moyen de paiement supprimé !');
   };
 
   const handleAddSocialLink = () => {
@@ -78,55 +43,22 @@ const SiteSettingsTab = () => {
       return;
     }
 
-    const newLink: SocialLink = {
-      id: Date.now().toString(),
-      platform: newSocialLink.platform,
-      url: newSocialLink.url,
-      icon: newSocialLink.platform
-    };
-
-    setSocialLinks([...socialLinks, newLink]);
+    addSocialLink(newSocialLink);
     setNewSocialLink({ platform: '', url: '' });
     toast.success('Lien social ajouté !');
   };
 
-  const handleRemoveSocialLink = (id: string) => {
-    setSocialLinks(socialLinks.filter(link => link.id !== id));
-    toast.success('Lien social supprimé !');
-  };
-
   const handleSaveContactInfo = () => {
-    // Dans un vrai projet, on sauvegarderait en base de données
-    localStorage.setItem('siteContactInfo', JSON.stringify(contactInfo));
     toast.success('Informations de contact sauvegardées !');
   };
 
   const handleSavePaymentMethods = () => {
-    localStorage.setItem('sitePaymentMethods', JSON.stringify(paymentMethods));
     toast.success('Moyens de paiement sauvegardés !');
   };
 
   const handleSaveSocialLinks = () => {
-    localStorage.setItem('siteSocialLinks', JSON.stringify(socialLinks));
     toast.success('Liens sociaux sauvegardés !');
   };
-
-  // Charger les données sauvegardées au démarrage
-  useEffect(() => {
-    const savedContactInfo = localStorage.getItem('siteContactInfo');
-    const savedPaymentMethods = localStorage.getItem('sitePaymentMethods');
-    const savedSocialLinks = localStorage.getItem('siteSocialLinks');
-
-    if (savedContactInfo) {
-      setContactInfo(JSON.parse(savedContactInfo));
-    }
-    if (savedPaymentMethods) {
-      setPaymentMethods(JSON.parse(savedPaymentMethods));
-    }
-    if (savedSocialLinks) {
-      setSocialLinks(JSON.parse(savedSocialLinks));
-    }
-  }, []);
 
   return (
     <div className="space-y-6">
@@ -150,7 +82,7 @@ const SiteSettingsTab = () => {
                 <label className="block text-sm font-medium mb-2">Téléphone</label>
                 <Input
                   value={contactInfo.phone}
-                  onChange={(e) => setContactInfo(prev => ({ ...prev, phone: e.target.value }))}
+                  onChange={(e) => updateContactInfo({ phone: e.target.value })}
                   placeholder="+33 1 23 45 67 89"
                 />
               </div>
@@ -160,8 +92,17 @@ const SiteSettingsTab = () => {
                 <Input
                   type="email"
                   value={contactInfo.email}
-                  onChange={(e) => setContactInfo(prev => ({ ...prev, email: e.target.value }))}
+                  onChange={(e) => updateContactInfo({ email: e.target.value })}
                   placeholder="contact@houseofbeauty.fr"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">WhatsApp</label>
+                <Input
+                  value={contactInfo.whatsapp}
+                  onChange={(e) => updateContactInfo({ whatsapp: e.target.value })}
+                  placeholder="+33 1 23 45 67 89"
                 />
               </div>
 
@@ -169,7 +110,7 @@ const SiteSettingsTab = () => {
                 <label className="block text-sm font-medium mb-2">Adresse</label>
                 <Textarea
                   value={contactInfo.address}
-                  onChange={(e) => setContactInfo(prev => ({ ...prev, address: e.target.value }))}
+                  onChange={(e) => updateContactInfo({ address: e.target.value })}
                   placeholder="123 Rue de la Beauté, 75001 Paris, France"
                   rows={3}
                 />
@@ -218,7 +159,7 @@ const SiteSettingsTab = () => {
                     <Button
                       size="icon"
                       variant="outline"
-                      onClick={() => handleRemovePaymentMethod(method.id)}
+                      onClick={() => removePaymentMethod(method.id)}
                       className="text-destructive"
                     >
                       <Trash2 className="h-4 w-4" />
@@ -261,14 +202,24 @@ const SiteSettingsTab = () => {
               <div className="space-y-2">
                 {socialLinks.map((link) => (
                   <div key={link.id} className="flex items-center justify-between p-3 border rounded">
-                    <div>
-                      <p className="font-medium">{link.platform}</p>
-                      <p className="text-sm text-muted-foreground">{link.url}</p>
+                    <div className="flex items-center gap-3">
+                      <div>
+                        <p className="font-medium">{link.platform}</p>
+                        <a 
+                          href={link.url} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-sm text-muted-foreground hover:text-luxury-gold flex items-center gap-1"
+                        >
+                          Voir le profil
+                          <ExternalLink className="h-3 w-3" />
+                        </a>
+                      </div>
                     </div>
                     <Button
                       size="icon"
                       variant="outline"
-                      onClick={() => handleRemoveSocialLink(link.id)}
+                      onClick={() => removeSocialLink(link.id)}
                       className="text-destructive"
                     >
                       <Trash2 className="h-4 w-4" />
