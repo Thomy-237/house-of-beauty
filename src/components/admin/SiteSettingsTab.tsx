@@ -24,7 +24,7 @@ const SiteSettingsTab = () => {
   } = useSiteSettings();
 
   const [newPaymentMethod, setNewPaymentMethod] = useState({ name: '', description: '' });
-  const [newSocialLink, setNewSocialLink] = useState({ platform: '', url: '' });
+  const [newSocialLink, setNewSocialLink] = useState({ platform: '', url: '', icon: '' });
 
   const handleAddPaymentMethod = () => {
     if (!newPaymentMethod.name) {
@@ -39,12 +39,18 @@ const SiteSettingsTab = () => {
 
   const handleAddSocialLink = () => {
     if (!newSocialLink.platform || !newSocialLink.url) {
-      toast.error('Veuillez remplir tous les champs');
+      toast.error('Veuillez remplir au moins la plateforme et l\'URL');
       return;
     }
 
-    addSocialLink(newSocialLink);
-    setNewSocialLink({ platform: '', url: '' });
+    // If no icon is provided, use the platform name as default
+    const linkToAdd = {
+      ...newSocialLink,
+      icon: newSocialLink.icon || newSocialLink.platform
+    };
+
+    addSocialLink(linkToAdd);
+    setNewSocialLink({ platform: '', url: '', icon: '' });
     toast.success('Lien social ajouté !');
   };
 
@@ -182,7 +188,7 @@ const SiteSettingsTab = () => {
               <CardTitle>Réseaux Sociaux</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <Input
                   placeholder="Nom de la plateforme"
                   value={newSocialLink.platform}
@@ -192,6 +198,11 @@ const SiteSettingsTab = () => {
                   placeholder="URL du profil"
                   value={newSocialLink.url}
                   onChange={(e) => setNewSocialLink(prev => ({ ...prev, url: e.target.value }))}
+                />
+                <Input
+                  placeholder="Icône (optionnel)"
+                  value={newSocialLink.icon}
+                  onChange={(e) => setNewSocialLink(prev => ({ ...prev, icon: e.target.value }))}
                 />
               </div>
               <Button onClick={handleAddSocialLink} className="btn-luxury">
