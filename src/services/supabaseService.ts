@@ -90,12 +90,60 @@ export const getTestimonials = async () => {
   return data;
 };
 
+export const getAllTestimonials = async () => {
+  const { data, error } = await supabase
+    .from('testimonials')
+    .select('*')
+    .order('created_at', { ascending: false });
+  if (error) {
+    console.error('Erreur récupération tous témoignages:', error);
+    throw error;
+  }
+  return data;
+};
+
 export const addTestimonial = async (testimonial: any) => {
   const { data, error } = await supabase
     .from('testimonials')
     .insert([testimonial]);
   if (error) {
     console.error('Erreur ajout témoignage:', error);
+    throw error;
+  }
+  return data;
+};
+
+export const updateTestimonial = async (id: string, updates: any) => {
+  const { data, error } = await supabase
+    .from('testimonials')
+    .update(updates)
+    .eq('id', id);
+  if (error) {
+    console.error('Erreur mise à jour témoignage:', error);
+    throw error;
+  }
+  return data;
+};
+
+export const deleteTestimonial = async (id: string) => {
+  const { data, error } = await supabase
+    .from('testimonials')
+    .delete()
+    .eq('id', id);
+  if (error) {
+    console.error('Erreur suppression témoignage:', error);
+    throw error;
+  }
+  return data;
+};
+
+export const approveTestimonial = async (id: string, approved: boolean) => {
+  const { data, error } = await supabase
+    .from('testimonials')
+    .update({ is_approved: approved })
+    .eq('id', id);
+  if (error) {
+    console.error('Erreur approbation témoignage:', error);
     throw error;
   }
   return data;
