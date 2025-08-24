@@ -1,17 +1,17 @@
 
 import React, { useState } from 'react';
-import { ShoppingCart, Menu, X, User } from 'lucide-react';
+import { Menu, X, ShoppingBag, Search, Phone, Mail } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/hooks/useCart';
-import { Link, useLocation } from 'react-router-dom';
-import SearchBar from '@/components/SearchBar';
-import ImageWithFallback from '@/components/ui/image-with-fallback';
-import { siteConfig } from '@/config/site.config';
+import { useSiteSettings } from '@/hooks/useSiteSettings';
+import SearchBar from './SearchBar';
+import FeminineHeaderBand from './FeminineHeaderBand';
 
 const Header = () => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { getTotalItems } = useCart();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const location = useLocation();
+  const { contactInfo } = useSiteSettings();
+  const totalItems = getTotalItems();
 
   const navigation = [
     { name: 'Accueil', href: '/' },
@@ -20,126 +20,96 @@ const Header = () => {
     { name: 'Contact', href: '/contact' },
   ];
 
-  const isActivePath = (path: string) => {
-    if (path === '/' && location.pathname === '/') return true;
-    if (path !== '/' && location.pathname.startsWith(path)) return true;
-    return false;
-  };
-
   return (
-    <header className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border-b border-border sticky top-0 z-50">
-      <div className="container-custom">
-        <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <Link to="/" className="flex items-center space-x-3">
-            <ImageWithFallback
-              src={siteConfig.assets.logo}
-              alt={siteConfig.name}
-              className="h-10 w-10 rounded-lg"
-              showLoader={false}
-            />
-            <span className="text-luxury-heading font-bold text-xl hidden sm:block">
-              {siteConfig.name}
-            </span>
-          </Link>
-
-          {/* Navigation desktop */}
-          <nav className="hidden lg:flex items-center space-x-8">
-            {navigation.map((item) => (
-              <Link
-                key={item.name}
-                to={item.href}
-                className={`text-sm font-medium transition-colors hover:text-luxury-gold ${
-                  isActivePath(item.href)
-                    ? 'text-luxury-gold'
-                    : 'text-foreground'
-                }`}
-              >
-                {item.name}
-              </Link>
-            ))}
-          </nav>
-
-          {/* Barre de recherche */}
-          <div className="hidden md:flex flex-1 max-w-sm mx-6">
-            <SearchBar />
-          </div>
-
-          {/* Actions */}
-          <div className="flex items-center space-x-4">
-            {/* Admin (caché par défaut, visible selon conditions) */}
-            <Link to="/admin" className="hidden">
-              <Button variant="ghost" size="icon">
-                <User className="h-5 w-5" />
-              </Button>
-            </Link>
-
-            {/* Panier */}
-            <Link to="/cart">
-              <Button variant="ghost" size="icon" className="relative">
-                <ShoppingCart className="h-5 w-5" />
-                {getTotalItems() > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-luxury-gold text-luxury-brown text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium">
-                    {getTotalItems()}
-                  </span>
-                )}
-              </Button>
-            </Link>
-
-            {/* Menu mobile */}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="lg:hidden"
-              onClick={() => setIsMobileMenuOpen(true)}
-            >
-              <Menu className="h-5 w-5" />
-            </Button>
-          </div>
-        </div>
-
-        {/* Barre de recherche mobile */}
-        <div className="md:hidden py-3 border-t border-border">
-          <SearchBar />
-        </div>
-      </div>
-
-      {/* Menu mobile */}
-      {isMobileMenuOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden">
-          <div className="fixed inset-0 bg-black/20" onClick={() => setIsMobileMenuOpen(false)} />
-          <div className="fixed right-0 top-0 h-full w-full max-w-sm bg-white dark:bg-gray-900 p-6 shadow-xl">
-            <div className="flex items-center justify-between mb-8">
-              <span className="text-luxury-heading font-bold text-xl">Menu</span>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                <X className="h-5 w-5" />
-              </Button>
+    <>
+      <FeminineHeaderBand />
+      <header className="bg-background border-b sticky top-0 z-50 backdrop-blur-sm bg-background/95">
+        {/* Contact info bar */}
+        <div className="bg-muted/30 py-2">
+          <div className="container-custom">
+            <div className="flex items-center justify-center gap-6 text-sm text-muted-foreground">
+              <div className="flex items-center gap-1">
+                <Phone className="h-3 w-3" />
+                <span>{contactInfo.phone}</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <Mail className="h-3 w-3" />
+                <span>{contactInfo.email}</span>
+              </div>
             </div>
-            
-            <nav className="space-y-4">
+          </div>
+        </div>
+
+        <div className="container-custom">
+          <div className="flex items-center justify-between h-16">
+            {/* Logo */}
+            <div className="flex items-center">
+              <a href="/" className="text-2xl font-bold text-primary">
+                House of Beauty
+              </a>
+            </div>
+
+            {/* Desktop Navigation */}
+            <nav className="hidden md:flex items-center space-x-8">
               {navigation.map((item) => (
-                <Link
+                <a
                   key={item.name}
-                  to={item.href}
-                  className={`block text-lg font-medium transition-colors hover:text-luxury-gold ${
-                    isActivePath(item.href)
-                      ? 'text-luxury-gold'
-                      : 'text-foreground'
-                  }`}
-                  onClick={() => setIsMobileMenuOpen(false)}
+                  href={item.href}
+                  className="text-foreground hover:text-primary transition-colors duration-200"
                 >
                   {item.name}
-                </Link>
+                </a>
               ))}
             </nav>
+
+            {/* Search and Cart */}
+            <div className="flex items-center gap-4">
+              <SearchBar />
+              
+              <a href="/cart" className="relative">
+                <Button variant="outline" size="icon">
+                  <ShoppingBag className="h-5 w-5" />
+                  {totalItems > 0 && (
+                    <span className="absolute -top-2 -right-2 bg-primary text-primary-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                      {totalItems}
+                    </span>
+                  )}
+                </Button>
+              </a>
+
+              {/* Mobile menu button */}
+              <div className="md:hidden">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => setIsMenuOpen(!isMenuOpen)}
+                >
+                  {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+                </Button>
+              </div>
+            </div>
           </div>
+
+          {/* Mobile Navigation */}
+          {isMenuOpen && (
+            <div className="md:hidden py-4 border-t">
+              <nav className="flex flex-col space-y-4">
+                {navigation.map((item) => (
+                  <a
+                    key={item.name}
+                    href={item.href}
+                    className="text-foreground hover:text-primary transition-colors duration-200 px-4 py-2"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    {item.name}
+                  </a>
+                ))}
+              </nav>
+            </div>
+          )}
         </div>
-      )}
-    </header>
+      </header>
+    </>
   );
 };
 

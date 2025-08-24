@@ -81,14 +81,14 @@ const TestimonialsManagement = () => {
     try {
       if (editingId) {
         await updateTestimonial(editingId, formData);
-        toast.success('Témoignage mis à jour !');
+        toast.success('Témoignage mis à jour avec succès !');
       } else {
         await addTestimonial(formData);
-        toast.success('Témoignage ajouté !');
+        toast.success('Témoignage ajouté avec succès !');
       }
       
       resetForm();
-      fetchTestimonials();
+      await fetchTestimonials(); // Recharger la liste
     } catch (error) {
       console.error('Erreur sauvegarde témoignage:', error);
       toast.error('Erreur lors de la sauvegarde');
@@ -114,8 +114,8 @@ const TestimonialsManagement = () => {
     
     try {
       await deleteTestimonial(id);
-      toast.success('Témoignage supprimé !');
-      fetchTestimonials();
+      toast.success('Témoignage supprimé avec succès !');
+      await fetchTestimonials();
     } catch (error) {
       console.error('Erreur suppression témoignage:', error);
       toast.error('Erreur lors de la suppression');
@@ -125,8 +125,8 @@ const TestimonialsManagement = () => {
   const handleApprovalToggle = async (id: string, currentStatus: boolean) => {
     try {
       await approveTestimonial(id, !currentStatus);
-      toast.success(`Témoignage ${!currentStatus ? 'approuvé' : 'désapprouvé'} !`);
-      fetchTestimonials();
+      toast.success(`Témoignage ${!currentStatus ? 'approuvé' : 'désapprouvé'} avec succès !`);
+      await fetchTestimonials();
     } catch (error) {
       console.error('Erreur modification approbation:', error);
       toast.error('Erreur lors de la modification');
@@ -153,9 +153,9 @@ const TestimonialsManagement = () => {
         {Array.from({ length: 3 }).map((_, index) => (
           <Card key={index} className="animate-pulse">
             <CardContent className="p-6">
-              <div className="h-4 bg-cream-100 dark:bg-cream-200 rounded mb-2" />
-              <div className="h-16 bg-cream-100 dark:bg-cream-200 rounded mb-2" />
-              <div className="h-4 bg-cream-100 dark:bg-cream-200 rounded w-1/3" />
+              <div className="h-4 bg-muted rounded mb-2" />
+              <div className="h-16 bg-muted rounded mb-2" />
+              <div className="h-4 bg-muted rounded w-1/3" />
             </CardContent>
           </Card>
         ))}
@@ -169,7 +169,7 @@ const TestimonialsManagement = () => {
         <h2 className="text-2xl font-bold">Gestion des Témoignages</h2>
         <Button 
           onClick={() => setShowAddForm(true)} 
-          className="btn-luxury"
+          className="bg-primary text-primary-foreground hover:bg-primary/90"
         >
           <Plus className="mr-2 h-4 w-4" />
           Ajouter un témoignage
@@ -231,19 +231,22 @@ const TestimonialsManagement = () => {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium mb-2">
-                    <ImageIcon className="inline mr-1 h-4 w-4" />
-                    URL de l'image
+                  <label className="block text-sm font-medium mb-2 flex items-center">
+                    <ImageIcon className="mr-1 h-4 w-4" />
+                    URL de l'image ou photo
                   </label>
                   <Input
                     value={formData.image_url}
                     onChange={(e) => setFormData(prev => ({ ...prev, image_url: e.target.value }))}
                     placeholder="https://exemple.com/image.jpg"
                   />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Ajoutez l'URL d'une photo du client (optionnel)
+                  </p>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-2">
-                    <Play className="inline mr-1 h-4 w-4" />
+                  <label className="block text-sm font-medium mb-2 flex items-center">
+                    <Play className="mr-1 h-4 w-4" />
                     URL de la vidéo
                   </label>
                   <Input
@@ -251,6 +254,9 @@ const TestimonialsManagement = () => {
                     onChange={(e) => setFormData(prev => ({ ...prev, video_url: e.target.value }))}
                     placeholder="https://exemple.com/video.mp4"
                   />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Ajoutez l'URL d'une vidéo témoignage (optionnel)
+                  </p>
                 </div>
               </div>
 
@@ -263,7 +269,7 @@ const TestimonialsManagement = () => {
               </div>
 
               <div className="flex gap-2">
-                <Button type="submit" className="btn-luxury">
+                <Button type="submit" className="bg-primary text-primary-foreground hover:bg-primary/90">
                   <Save className="mr-2 h-4 w-4" />
                   {editingId ? 'Mettre à jour' : 'Ajouter'}
                 </Button>
@@ -293,10 +299,10 @@ const TestimonialsManagement = () => {
                       <ImageWithFallback
                         src={testimonial.image_url}
                         alt={testimonial.name}
-                        className="w-12 h-12 rounded-full object-cover"
+                        className="w-12 h-12 rounded-full object-cover border-2 border-primary/20"
                       />
                     ) : (
-                      <div className="w-12 h-12 rounded-full bg-luxury-gradient flex items-center justify-center text-white font-semibold">
+                      <div className="w-12 h-12 rounded-full bg-gradient-to-r from-primary to-primary/80 flex items-center justify-center text-white font-semibold">
                         {testimonial.name.charAt(0)}
                       </div>
                     )}
@@ -333,36 +339,49 @@ const TestimonialsManagement = () => {
                       size="icon"
                       variant="outline"
                       onClick={() => handleDelete(testimonial.id)}
-                      className="text-destructive"
+                      className="text-destructive hover:text-destructive"
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
                 </div>
 
-                <blockquote className="text-muted-foreground italic mb-4">
+                <blockquote className="text-muted-foreground italic mb-4 pl-4 border-l-4 border-primary/20">
                   "{testimonial.message}"
                 </blockquote>
 
                 {(testimonial.image_url || testimonial.video_url) && (
-                  <div className="flex gap-4 mt-4">
+                  <div className="flex gap-4 mt-4 p-3 bg-muted/30 rounded-lg">
                     {testimonial.image_url && (
-                      <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                        <ImageIcon className="h-3 w-3" />
-                        Photo attachée
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
+                          <ImageIcon className="h-4 w-4 text-primary" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium">Photo attachée</p>
+                          <p className="text-xs text-muted-foreground">Image disponible</p>
+                        </div>
                       </div>
                     )}
                     {testimonial.video_url && (
-                      <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                        <Play className="h-3 w-3" />
-                        Vidéo attachée
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
+                          <Play className="h-4 w-4 text-primary" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium">Vidéo attachée</p>
+                          <p className="text-xs text-muted-foreground">Vidéo témoignage disponible</p>
+                        </div>
                       </div>
                     )}
                   </div>
                 )}
 
-                <div className="text-xs text-muted-foreground mt-2">
-                  Créé le {new Date(testimonial.created_at).toLocaleDateString('fr-FR')}
+                <div className="text-xs text-muted-foreground mt-3 flex items-center justify-between">
+                  <span>Créé le {new Date(testimonial.created_at).toLocaleDateString('fr-FR')}</span>
+                  {testimonial.phone && (
+                    <span>Tél: {testimonial.phone}</span>
+                  )}
                 </div>
               </CardContent>
             </Card>
